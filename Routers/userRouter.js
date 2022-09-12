@@ -1,4 +1,4 @@
-const userModel = require("../model/useModel")
+const userModel = require("../model/userModel")
 const express = require('express');
 const userRouter = express.Router();
 const protectRoute = require("./routeHelper");

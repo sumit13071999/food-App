@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 const emailValidator=require("email-validator")
-let {DB_Link}=require("../model/screte");
+let {DB_Link}=require("./screte");
 mongoose.connect(DB_Link).then(function(db){
     console.log("db created");
 }).catch(function(err){
@@ -46,7 +46,11 @@ const userSchema=new mongoose.Schema({
         type:String,
         enum:["admin","user","manager"],
         default:"user"
-    }
+    },
+    bookings:{
+        type:[mongoose.Schema.ObjectId],
+        ref:"bookingModel"
+    },
 })
 userSchema.pre("save",function(){
     // db confirm password will not saved

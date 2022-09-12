@@ -2,25 +2,19 @@ const express=require("express");
 const bookingRouter=express.Router();
 const factory=require("../helper/factory");
 const protectRoute=require("./authRouter");
-const planModel=require("../model/planModel");
+const userModel=require("../model/userModel");
 const bookingModel=require("../model/bookingModel");
+// const reviewModel=require("../model/reviewModel");
 
 
-const createbooking=async function(req,res){
+const initiateBooking=async function(req,res){
 try{
-let booking=bookingModel.create(req.body);
-console.log("booking",booking);
-let PlanId=await booking.plan;
-let plan=await planModel.findById(PlanId);
-plan.bookings.push(booking["_id"]);
-if(plan.averageRating){
-let sum=plan.averageRating*plan.bookings.length;
-let finalAvgRating=(sum+booking.rating)/(plan.booking.length+1);
-plan.averageRating=finalAvgRating;
-}else{
-    plan.averageRating=booking.rating;
-}
-await plan.save();
+let booking=await bookingModel.create(req.body);
+let bookingId=booking["_id"];
+let userId=req.body.user;
+let user=await userModel.findById(userId);
+user.bookings.push(bookingId);
+await user.save();
 res.status(200).json({
     message:"booking created",
     booking:booking
@@ -36,11 +30,11 @@ const deletebooking=async function(req,res){
     try{
     let booking=bookingModel.findByIdAndDelete(req.body);
     console.log("booking",booking);
-    let PlanId=await booking.plan;
-    let plan=await planModel.findById(PlanId);
-    let idxOfbooking =plan.bookings.indexOf(booking["_id"]);
-    plan.booking.splice(idxOfbooking,1);
-    await plan.save();
+    let userId=await booking.user;
+    let user=await userModel.findById(userId);
+    let idxOfbooking =user.bookings.indexOf(booking["_id"]);
+    user.booking.splice(idxOfbooking,1);
+    await user.save();
     res.status(200).json({
         message:"booking deleted",
         booking:booking
@@ -58,29 +52,12 @@ bookingRouter.use(protectRoute);
 bookingRouter.route("/") 
 // add protectRoute in that
     .get(getbookings)
-    .post(createbooking);
+    .post(initiateBooking);
     
 
 bookingRouter.route("/:id")
     .get(getbookingById)
     .patch(updatebooking)
     .delete(deletebooking);
-    bookingRouter.route("/top3plans").get(Top3Plans);
-    async function Top3Plans(){
-        // booking model -> get me first three plan in decreaseing order of rating
-         try{
-            //find Empty ->full model search and you will get all the enteries
-            const bookings=await bookingModel.find().limit(3).sort({
-                rating: -1
-            });
-            res.status().json({
-                bookings,
-                message:"bookings "
-            })
-         }catch(err){
-          res.status().json({
-            err:err.message
-          })
-         }
-    }
+    
     module.exports=bookingRouter;

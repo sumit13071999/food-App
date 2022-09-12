@@ -10,11 +10,13 @@ const authRouter=require("./Routers/authRouter");
 const userRouter=require("./Routers/userRouter");
 const planRouter=require("./Routers/planRouter");
 const reviewRouter=require("./Routers/reviewRouter");
+const bookingRouter=require("./Routers/bookingRouter");
 app.use(cookieParser());
 app.use('/api/user', userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/plan", planRouter);
 app.use("/api/review",reviewRouter);  
+app.use("/api/booking",bookingRouter);
 
 // app.get('/api/user', createUser);
 // app.post('/api/user',getUser);
